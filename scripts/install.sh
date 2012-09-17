@@ -5,16 +5,26 @@ else
   dir=$1
 fi
 
-mkdir $dir
+if [ $# -lt 2 ]
+then
+  phpversion="5.4.7"
+else
+  phpversion=$2
+fi
+
+if [ ! -d $dir ]; 
+then
+  mkdir $dir
+fi
 cd $dir
 
 # Download php src and enable sockets extension
-if [ ! -f php-5.4.7.tar.gz ];
+if [ ! -f php-$phpversion.tar.gz ];
 then
-  wget http://us2.php.net/get/php-5.4.7.tar.gz/from/this/mirror
+  wget http://us2.php.net/get/php-$phpversion.tar.gz/from/us.php.net/mirror -O php-$phpversion.tar.gz
 fi
-tar xvf php-5.4.7.tar.gz
-cd php-5.4.7
+tar xvf php-$phpversion.tar.gz
+cd php-$phpversion
 ./configure --enable-sockets --prefix=$dir
 make
 make install
@@ -40,5 +50,8 @@ make && make install
 cd $dir
 
 # write php.ini file
-echo -e "extension_dir="$dir"/lib/php/extensions/no-debug-non-zts-20100525\n" > php.ini
-echo -e "extension=uv.so\nextension=httpparser.so" >> php.ini
+
+extension_dir=$($dir/bin/php-config --extension-dir)
+
+echo "extension_dir=$extension_dir\n" > php.ini
+echo "extension=uv.so\nextension=httpparser.so" >> php.ini
